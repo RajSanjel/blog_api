@@ -1,0 +1,12 @@
+[package]
+name = "rust-blog-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.3"
+chrono = { version = "0.4.40", features = ["serde"] }
+serde = { version = "1.0.219", features = ["derive"] }
+sqlx = "0.8.3"
+tokio = { version = "1.44.2", features = ["rt-multi-thread"] }
+uuid = { version = "1.16.0", features = ["serde"] }
