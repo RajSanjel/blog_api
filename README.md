@@ -26,3 +26,11 @@ This project is still in development. To run it:
 ```bash
 cargo run
 ```
+
+## API ENDPOINTS
+
+| Path           | Method | Params                          | Description         |
+| -------------- | ------ | ------------------------------- | ------------------- |
+| /auth/register | POST   | `email`, `username`, `password` | Register a new user |
+
+**Note: More description will be added as the features gets added.**
