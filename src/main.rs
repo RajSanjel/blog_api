@@ -1,12 +1,11 @@
 mod db;
+mod handlers;
 mod models;
 mod routes;
-
 const URL_ADDRESS: &str = "0.0.0.0:3000";
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // creating router
     dotenv::dotenv().ok();
 
     // Connect to the database
