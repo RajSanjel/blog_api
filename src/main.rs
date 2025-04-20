@@ -2,6 +2,7 @@ mod db;
 mod handlers;
 mod models;
 mod routes;
+mod utils;
 const URL_ADDRESS: &str = "0.0.0.0:3000";
 
 #[tokio::main]

@@ -27,10 +27,19 @@ This project is still in development. To run it:
 cargo run
 ```
 
+## Create Public and private key for JWT
+
+Generate a 2048-bit private key
+`openssl genrsa -out private.pem 2048`
+
+Extract the public key
+`openssl rsa -in private.pem -pubout -out public.pem`
+
 ## API ENDPOINTS
 
-| Path           | Method | Params                          | Description         |
-| -------------- | ------ | ------------------------------- | ------------------- |
-| /auth/register | POST   | `email`, `username`, `password` | Register a new user |
+| Path             | Method | Params                          | Description         |
+| ---------------- | ------ | ------------------------------- | ------------------- |
+| `/auth/register` | POST   | `email`, `username`, `password` | Register a new user |
+| `/auth/login`    | POST   | `email`, `password`             | Login a user        |
 
 **Note: More description will be added as the features gets added.**
