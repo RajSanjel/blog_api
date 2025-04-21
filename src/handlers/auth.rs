@@ -5,7 +5,10 @@ use crate::{
         user::User,
     },
     response::server_response::ServerResponse,
-    utils::{cookies::set_cookie, jwt::get_rsa_encoding_key},
+    utils::{
+        cookies::{remove_cookie, set_cookie},
+        jwt::get_rsa_encoding_key,
+    },
 };
 use axum::{Json, extract::State, response::IntoResponse};
 use bcrypt::DEFAULT_COST;
@@ -139,6 +142,13 @@ pub async fn login(
         Err(_) => Ok(ServerResponse::ServerError(
             "Something went wrong".to_string(),
         )),
+    }
+}
+
+pub async fn logout_user(cookies: Cookies) -> impl IntoResponse {
+    match remove_cookie(cookies, "auth-token").await {
+        Ok(_) => ServerResponse::SuccessMessage("Logged out successfully".to_string(), None::<()>),
+        Err(_) => ServerResponse::ServerError("Something went wrong".to_string()),
     }
 }
 

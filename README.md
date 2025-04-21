@@ -41,6 +41,7 @@ Extract the public key
 | ---------------- | ------ | ------------------------------- | ------------------- |
 | `/auth/register` | POST   | `email`, `username`, `password` | Register a new user |
 | `/auth/login`    | POST   | `email`, `password`             | Login a user        |
+| `/auth/logout`   | POST   | --                              | Logs User out       |
 | `/api/get_user`  | GET    | --                              | Gets user data      |
 
 **Note: More description will be added as the features gets added.**
