@@ -1,69 +1,52 @@
-use axum::{
-    Json,
-    extract::State,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
-
-use jsonwebtoken::{EncodingKey, Header, encode};
-
-use tower_cookies::Cookies;
-
-use bcrypt::DEFAULT_COST;
-
 use crate::{
     db::DbPool,
     models::{
         auth::{LoginRequest, RegisterRequest, TokenClaims},
         user::User,
     },
-    utils::cookies::set_cookie,
+    response::server_response::ServerResponse,
+    utils::{cookies::set_cookie, jwt::get_rsa_encoding_key},
 };
-
-pub enum AuthMessages {
-    BadRequest(String),
-    SuccessMessage(String),
-    ServerError(String),
-}
-
-impl IntoResponse for AuthMessages {
-    fn into_response(self) -> Response {
-        match self {
-            Self::BadRequest(message) => (StatusCode::BAD_REQUEST, message).into_response(),
-            Self::SuccessMessage(message) => (StatusCode::OK, message).into_response(),
-            Self::ServerError(message) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, message).into_response()
-            }
-        }
-    }
-}
+use axum::{Json, extract::State, response::IntoResponse};
+use bcrypt::DEFAULT_COST;
+use jsonwebtoken::{Header, encode};
+use tower_cookies::Cookies;
 
 // register user logic
-
 pub async fn register(
     State(pool): State<DbPool>,
     Json(payload): Json<RegisterRequest>,
-) -> Result<impl IntoResponse, AuthMessages> {
+) -> Result<impl IntoResponse, ServerResponse<()>> {
     let email = payload.email;
     let password = payload.password;
     let username = payload.username;
     let hashed_password = hash_password(&password)
-        .map_err(|_| AuthMessages::ServerError("Hashing error".to_string()))?;
+        .map_err(|_| ServerResponse::ServerError("Hashing error".to_string()))?;
     if !email.contains("@") {
-        return Err(AuthMessages::BadRequest("Invalid Email".to_string()));
+        return Err(ServerResponse::BadRequest(
+            "Invalid Email".to_string(),
+            None,
+        ));
     }
 
     if username.is_empty() || username.len() < 3 {
-        return Err(AuthMessages::BadRequest("Invalid Username".to_string()));
+        return Err(ServerResponse::BadRequest(
+            "Invalid Username".to_string(),
+            None,
+        ));
     }
 
     if password.len() < 8 {
-        return Err(AuthMessages::BadRequest("Invalid Password".to_string()));
+        return Err(ServerResponse::BadRequest(
+            "Invalid Password".to_string(),
+            None,
+        ));
     }
 
     match check_if_user_exists(&pool, &username, &email).await {
-        Ok(true) => Err(AuthMessages::BadRequest(
+        Ok(true) => Err(ServerResponse::BadRequest(
             "Invalid email or username".to_string(),
+            None,
         )),
         Ok(false) => {
             sqlx::query_as::<_, User>(
@@ -74,13 +57,14 @@ pub async fn register(
             .bind(&hashed_password)
             .fetch_one(&*pool)
             .await
-            .map_err(|_e| AuthMessages::ServerError("Something went wrong".to_string()))?;
+            .map_err(|_e| ServerResponse::ServerError("Something went wrong".to_string()))?;
 
-            Ok(AuthMessages::SuccessMessage(
+            Ok(ServerResponse::SuccessMessage(
                 "User registered successfully!".to_string(),
+                None::<()>,
             ))
         }
-        Err(_) => Err(AuthMessages::ServerError(
+        Err(_) => Err(ServerResponse::ServerError(
             "Something went wrong.".to_string(),
         )),
     }
@@ -92,12 +76,12 @@ pub async fn login(
     cookies: Cookies,
     State(pool): State<DbPool>,
     Json(payload): Json<LoginRequest>,
-) -> Result<impl IntoResponse, AuthMessages> {
+) -> Result<impl IntoResponse, ServerResponse<()>> {
     let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email=$1")
         .bind(payload.email)
         .fetch_one(&*pool)
         .await
-        .map_err(|_e| AuthMessages::BadRequest("Invalid email or username".to_string()))?;
+        .map_err(|_e| ServerResponse::BadRequest("Invalid email or username".to_string(), None))?;
 
     match verify_password(&payload.password, user.password) {
         Ok(true) => {
@@ -113,7 +97,7 @@ pub async fn login(
                 Ok(key) => key,
                 Err(err) => {
                     eprintln!("RSA Key Load Error: {:?}", err);
-                    return Err(AuthMessages::ServerError(
+                    return Err(ServerResponse::ServerError(
                         "Internal server error".to_string(),
                     ));
                 }
@@ -128,7 +112,7 @@ pub async fn login(
                 Ok(token) => token,
                 Err(err) => {
                     eprintln!("JWT Encode Error: {:?}", err);
-                    return Err(AuthMessages::ServerError(
+                    return Err(ServerResponse::ServerError(
                         "Internal Server Error.".to_string(),
                     ));
                 }
@@ -143,23 +127,22 @@ pub async fn login(
             )
             .await;
 
-            Ok(AuthMessages::SuccessMessage("User logged in".to_string()))
+            Ok(ServerResponse::SuccessMessage(
+                "User logged in".to_string(),
+                None::<()>,
+            ))
         }
-        Ok(false) => Err(AuthMessages::BadRequest(
+        Ok(false) => Err(ServerResponse::BadRequest(
             "Invalid email or username".to_string(),
+            None,
         )),
-        Err(_) => Ok(AuthMessages::ServerError(
+        Err(_) => Ok(ServerResponse::ServerError(
             "Something went wrong".to_string(),
         )),
     }
 }
 
 // Helper function
-pub fn get_rsa_encoding_key() -> Result<EncodingKey, Box<dyn std::error::Error>> {
-    let path = std::env::var("PRIVATE_KEY_PATH")?;
-    let pem = std::fs::read(path)?;
-    Ok(EncodingKey::from_rsa_pem(&pem)?)
-}
 
 fn verify_password(
     password: &String,

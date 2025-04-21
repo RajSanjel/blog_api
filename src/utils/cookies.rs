@@ -13,3 +13,10 @@ pub async fn set_cookie(
     cookie.set_path(path);
     cookies.add(cookie)
 }
+
+pub async fn read_cookies(cookies: Cookies, name: &str) -> Result<String, &'static str> {
+    cookies
+        .get(name)
+        .map(|c| c.value().to_string())
+        .ok_or("Cookie not found")
+}

@@ -10,3 +10,10 @@ pub struct User {
     pub password: String,
     pub created_at: chrono::NaiveDateTime,
 }
+
+#[derive(Serialize)]
+pub struct UserData {
+    pub user_id: Uuid,
+    pub email: String,
+    pub username: String,
+}
