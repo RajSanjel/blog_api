@@ -11,7 +11,7 @@ pub struct User {
     pub created_at: chrono::NaiveDateTime,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct UserData {
     pub user_id: Uuid,
     pub email: String,

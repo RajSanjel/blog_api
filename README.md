@@ -41,7 +41,11 @@ Extract the public key
 | ---------------- | ------ | ------------------------------- | ------------------- |
 | `/auth/register` | POST   | `email`, `username`, `password` | Register a new user |
 | `/auth/login`    | POST   | `email`, `password`             | Login a user        |
-| `/auth/logout`   | POST   | --                              | Logs User out       |
-| `/api/get_user`  | GET    | --                              | Gets user data      |
+| `/auth/logout`   | POST   | None                            | Logs User out       |
+| `/api/get_user`  | GET    | None                            | Gets user data      |
+| `/api/post/`     | POST   | TO BE IMPLEMENTED               | Posts a blog.       |
+| `/api/post/{id}` | GET    | TO BE IMPLEMENTED               | Gets a post with id |
+| `/api/post/{id}` | PUT    | TO BE IMPLEMENTED               | Gets edits the post |
+| `/api/get/posts` | PUT    | TO BE IMPLEMENTED               | Gets all the posts  |
 
 **Note: More description will be added as the features gets added.**
