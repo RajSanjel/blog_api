@@ -14,7 +14,7 @@ CREATE TABLE posts (
     title VARCHAR(255) NOT NULL,
     body TEXT NOT NULL,
     slug VARCHAR(255) NOT NULL UNIQUE,
-    author_id INTEGER NOT NULL,
+    author_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );

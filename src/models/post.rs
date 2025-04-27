@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -8,7 +8,7 @@ pub struct Post {
     pub title: String,
     pub body: String,
     pub slug: String,
-    pub author_id: i32,
+    pub author_id: Uuid,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: Option<chrono::NaiveDateTime>,
 }
@@ -19,4 +19,10 @@ pub struct PostResonse {
     pub body: String,
     pub slug: String,
     pub created_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PostRequest {
+    pub title: String,
+    pub body: String,
 }
