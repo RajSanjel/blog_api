@@ -3,7 +3,11 @@ use crate::{
     models::post::{Post, PostRequest},
     response::server_response::ServerResponse,
 };
-use axum::{Extension, Json, extract::State, response::IntoResponse};
+use axum::{
+    Extension, Json,
+    extract::{Path, State},
+    response::IntoResponse,
+};
 use rand::Rng;
 use regex::Regex;
 
@@ -60,6 +64,27 @@ pub async fn blog_post(
             "Something went wrong: {}",
             e
         ))),
+    }
+}
+
+pub async fn get_blog(
+    Path(post_id): Path<String>,
+    State(pool): State<DbPool>,
+) -> Result<impl IntoResponse, ServerResponse<()>> {
+    let post = sqlx::query_as::<_, Post>("SELECT * FROM posts WHERE slug=$1")
+        .bind(post_id)
+        .fetch_one(&*pool)
+        .await
+        .map_err(|_| "Invalid ID provided");
+
+    match post {
+        Ok(post) => Ok(ServerResponse::SuccessMessage(
+            "Working".to_string(),
+            Some(post),
+        )),
+        Err(_) => Err(ServerResponse::ServerError(
+            "Invalid ID provided".to_string(),
+        )),
     }
 }
 

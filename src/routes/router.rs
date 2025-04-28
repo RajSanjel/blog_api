@@ -1,7 +1,7 @@
 use super::check_health::check_health;
 use crate::db::DbPool;
 use crate::handlers::auth::{login, logout_user, register};
-use crate::handlers::post::blog_post;
+use crate::handlers::post::{blog_post, get_blog};
 use crate::handlers::user::get_user;
 use crate::middleware::verify_user::verify_user;
 
@@ -15,7 +15,10 @@ pub fn create_router(pool: DbPool) -> Router {
         .route("/login", post(login))
         .route("/logout", post(logout_user));
 
-    let api_router = Router::new().route("/check_health", get(check_health));
+    let api_router = Router::new()
+        .route("/check_health", get(check_health))
+        .route("/post/{id}", get(get_blog));
+
     let protected_api_router = Router::new()
         .route("/get_user", get(get_user))
         .route("/post", post(blog_post))

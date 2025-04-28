@@ -44,7 +44,7 @@ Extract the public key
 | `/auth/logout`   | POST   | None                            | Logs User out       |
 | `/api/get_user`  | GET    | None                            | Gets user data      |
 | `/api/post/`     | POST   | `title`, `body`                 | Posts a blog.       |
-| `/api/post/{id}` | GET    | TO BE IMPLEMENTED               | Gets a post with id |
+| `/api/post/{id}` | GET    | None                            | Gets a post with id |
 | `/api/post/{id}` | PUT    | TO BE IMPLEMENTED               | Gets edits the post |
 | `/api/get/posts` | PUT    | TO BE IMPLEMENTED               | Gets all the posts  |
 
